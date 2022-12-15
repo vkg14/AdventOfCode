@@ -4,14 +4,16 @@ from collections import defaultdict, namedtuple
 Sensor = namedtuple('Sensor', ['x', 'y', 'd'])
 
 
-def parse_positions(line: str):
-    l = line.rstrip('\n').split()
-    x1 = int(l[2].rstrip(',').split('=')[1])
-    y1 = int(l[3].rstrip(':').split('=')[1])
-    x2 = int(l[8].rstrip(',').split('=')[1])
-    y2 = int(l[9].split('=')[1])
-    dist = abs(x2 - x1) + abs(y2 - y1)
-    return Sensor(x1, y1, dist), x2, y2
+def parse_positions(filename: str):
+    with open(filename) as f:
+        for line in f:
+            l = line.rstrip('\n').split()
+            x1 = int(l[2].rstrip(',').split('=')[1])
+            y1 = int(l[3].rstrip(':').split('=')[1])
+            x2 = int(l[8].rstrip(',').split('=')[1])
+            y2 = int(l[9].split('=')[1])
+            dist = abs(x2 - x1) + abs(y2 - y1)
+            yield Sensor(x1, y1, dist), x2, y2
 
 
 def find_range(sensor, potential_y, low_bound, high_bound):
@@ -26,16 +28,13 @@ def find_range(sensor, potential_y, low_bound, high_bound):
 def solve_part1(filename, y_target=2000000):
     s = set()
     beacons = set()
-    with open(filename) as f:
-        for line in f:
-            # the beacon matters because need to remove from sol'n
-            sensor, x2, y2 = parse_positions(line)
-            bounds = find_range(sensor, y_target, -math.inf, math.inf)
-            if not bounds:
-                continue
-            s.update(set(range(bounds[0], bounds[1] + 1)))
-            if y2 == y_target:
-                beacons.add(x2)
+    for sensor, x2, y2 in parse_positions(filename):
+        bounds = find_range(sensor, y_target, -math.inf, math.inf)
+        if not bounds:
+            continue
+        s.update(set(range(bounds[0], bounds[1] + 1)))
+        if y2 == y_target:
+            beacons.add(x2)
     return len(s.difference(beacons))
 
 
@@ -67,13 +66,9 @@ def merge_other(sorted_ranges, new_range):
 
 
 def solve_part2(filename, high_bound=4000000):
-    sensors = []
     low_bound = 0
-    with open(filename) as f:
-        for line in f:
-            # the beacon doesn't matter
-            sensor, _, _ = parse_positions(line)
-            sensors.append(sensor)
+    # beacons don't matter - only sensor w/ distance
+    sensors = [sensor for sensor, _, _ in parse_positions(filename)]
     ranges = defaultdict(list)
     for sensor in sensors:
         for y2 in range(sensor.y - sensor.d, sensor.y + sensor.d + 1):
