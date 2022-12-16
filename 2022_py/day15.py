@@ -163,7 +163,6 @@ def solve_part2_sensor_pairs(filename, high_bound=4000000):
     low_bound = 0
     # beacons don't matter - only sensor w/ distance
     sensors = [sensor for sensor, _, _ in parse_positions(filename)]
-    n = len(sensors)
     segments = []
     for sensor in sensors:
         radius = sensor.d + 1
