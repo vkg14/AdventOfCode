@@ -1,3 +1,4 @@
+import math
 from collections import defaultdict
 from itertools import chain, combinations
 
@@ -68,22 +69,26 @@ def solve_part1_top_down(filename):
 
 def solve_part1_dfs(filename):
     adjacency, rates = parse_input(filename)
-    return dfs('AA', set(), 30, adjacency, rates, dict())
+    apsp = floyd_warshall(adjacency)
+    return dfs('AA', set(), 30, apsp, rates, dict())
 
 
-def dfs(curr, opened, iterations, adjacency, rates, cache):
+def dfs(curr, opened, iterations, apsp, rates, cache):
     m = 0
     hashable_opened = tuple(sorted(list(opened)))
     if (curr, iterations, hashable_opened) in cache:
         return cache[(curr, iterations, hashable_opened)]
-    if iterations == 0 or len(opened) == len(rates):
+    if iterations == 0:
         return 0
     if curr not in opened and rates[curr] > 0:
         opened.add(curr)
-        m = dfs(curr, opened, iterations - 1, adjacency, rates, cache) + rates[curr] * (iterations - 1)
+        m = dfs(curr, opened, iterations - 1, apsp, rates, cache) + rates[curr] * (iterations - 1)
         opened.remove(curr)
-    for w in adjacency[curr]:
-        m = max(m, dfs(w, opened, iterations - 1, adjacency, rates, cache))
+    for adj in apsp[curr]:
+        if curr == adj or adj in opened or apsp[curr][adj] > iterations or rates[adj] == 0:
+            # Prevent self-loop, moving towards opened/zero valve and moving beyond iterations left.
+            continue
+        m = max(m, dfs(adj, opened, iterations - apsp[curr][adj], apsp, rates, cache))
     cache[(curr, iterations, hashable_opened)] = m
     return m
 
@@ -94,20 +99,41 @@ def powerset(iterable):
     return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
 
 
+def floyd_warshall(adjacency):
+    all_pairs_shortest = dict()
+    for v in adjacency:
+        all_pairs_shortest[v] = {v: 0}
+        for w in adjacency[v]:
+            all_pairs_shortest[v][w] = 1
+    for k in adjacency:
+        for i in adjacency:
+            for j in adjacency:
+                if (
+                        all_pairs_shortest[i].get(j, math.inf) > all_pairs_shortest[i].get(k, math.inf) +
+                        all_pairs_shortest[k].get(j, math.inf)
+                ):
+                    all_pairs_shortest[i][j] = all_pairs_shortest[i][k] + all_pairs_shortest[k][j]
+    return all_pairs_shortest
+
+
 def solve_part2(filename):
     adjacency, rates = parse_input(filename)
+    apsp = floyd_warshall(adjacency)
     non_zero_flow = [k for k, r in rates.items() if r != 0]
     total = 0
     cache = dict()
-    for subset in powerset(non_zero_flow):
-        m1 = dfs('AA', set(subset), 26, adjacency, rates, cache)
-        m2 = dfs('AA', set(non_zero_flow).difference(set(subset)), 26, adjacency, rates, cache)
+    powerset_length = 2**len(non_zero_flow)
+    for i, subset in enumerate(powerset(non_zero_flow), 1):
+        m1 = dfs('AA', set(subset), 26, apsp, rates, cache)
+        m2 = dfs('AA', set(non_zero_flow).difference(set(subset)), 26, apsp, rates, cache)
         total = max(total, m1 + m2)
+        if i > powerset_length // 2:
+            break
     return total
 
 
 if __name__ == '__main__':
-    # print(solve_part1_dfs("example16.txt"))
-    # print(solve_part1_dfs("input16.txt"))
+    print(solve_part1_dfs("example16.txt"))
+    print(solve_part1_dfs("input16.txt"))
     print(solve_part2("example16.txt"))
     print(solve_part2("input16.txt"))
