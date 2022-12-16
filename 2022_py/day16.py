@@ -78,15 +78,17 @@ def dfs(curr, opened, iterations, apsp, rates, cache):
     hashable_opened = tuple(sorted(list(opened)))
     if (curr, iterations, hashable_opened) in cache:
         return cache[(curr, iterations, hashable_opened)]
-    if iterations == 0:
+    non_zero_rates = len([k for k, r in rates.items() if r != 0])
+    if iterations == 0 or len(opened) == non_zero_rates:
         return 0
     if curr not in opened and rates[curr] > 0:
         opened.add(curr)
         m = dfs(curr, opened, iterations - 1, apsp, rates, cache) + rates[curr] * (iterations - 1)
+        # Undo opening once sub-problem finishes
         opened.remove(curr)
     for adj in apsp[curr]:
-        if curr == adj or adj in opened or apsp[curr][adj] > iterations or rates[adj] == 0:
-            # Prevent self-loop, moving towards opened/zero valve and moving beyond iterations left.
+        if adj in opened or apsp[curr][adj] > iterations or rates[adj] == 0:
+            # Moving towards opened/zero valve and moving beyond iterations left.
             continue
         m = max(m, dfs(adj, opened, iterations - apsp[curr][adj], apsp, rates, cache))
     cache[(curr, iterations, hashable_opened)] = m
@@ -113,6 +115,9 @@ def floyd_warshall(adjacency):
                         all_pairs_shortest[k].get(j, math.inf)
                 ):
                     all_pairs_shortest[i][j] = all_pairs_shortest[i][k] + all_pairs_shortest[k][j]
+    for v in adjacency:
+        # Remove self-loop post APSP computation
+        all_pairs_shortest[v].pop(v)
     return all_pairs_shortest
 
 
@@ -124,6 +129,7 @@ def solve_part2(filename):
     cache = dict()
     powerset_length = 2**len(non_zero_flow)
     for i, subset in enumerate(powerset(non_zero_flow), 1):
+        # Use complementary subsets for both elephant and you.
         m1 = dfs('AA', set(subset), 26, apsp, rates, cache)
         m2 = dfs('AA', set(non_zero_flow).difference(set(subset)), 26, apsp, rates, cache)
         total = max(total, m1 + m2)
