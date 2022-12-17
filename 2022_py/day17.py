@@ -105,40 +105,44 @@ def solve(filename, n=1000000000000):
     states_seen = dict()
     max_heights = dict()
     while shape_idx < n:
-        gas = jetstream[gas_idx % len(jetstream)]
-        if gas == 1:
-            current_shape.move_right(rocks)
-        elif gas == -1:
-            current_shape.move_left(rocks)
-        gas_idx += 1
-        fall_res = current_shape.move_down(rocks)
-        if not fall_res:
-            new_rocks = current_shape.get_blocks()
-            old_max = max_y
-            max_y = max(max_y, *[y for x, y in new_rocks])
-            rocks.update(new_rocks)
-            # Record peak shape
-            max_heights[shape_idx] = max_y
-            dy = max_y - old_max
-            for i in range(len(peaks)):
-                peaks[i] -= dy
-            for x, y in new_rocks:
-                peaks[x] = max(peaks[x], y - max_y)
-            state = (shape_idx % len(shapes), gas_idx % len(jetstream), tuple(peaks))
-            if state in states_seen and n > 10 ** 5:
-                # Found cycle!
-                n_prev_shape = states_seen[state]
-                prev_max_h = max_heights[n_prev_shape]
-                cycle_height_change = max_y - prev_max_h
-                cycle_length = shape_idx - n_prev_shape
-                target = n - n_prev_shape
-                cycles = target // cycle_length
-                leftover_height_change = max_heights[n_prev_shape + (target % cycle_length)] - prev_max_h
-                return prev_max_h + (cycle_height_change * cycles) + leftover_height_change
-            states_seen[state] = shape_idx
-            # Move to next shape
-            shape_idx += 1
-            current_shape = shapes[shape_idx % len(shapes)].make(max_y)
+        still_falling = True
+        while still_falling:
+            gas = jetstream[gas_idx % len(jetstream)]
+            if gas == 1:
+                current_shape.move_right(rocks)
+            elif gas == -1:
+                current_shape.move_left(rocks)
+            else:
+                raise Exception("Bad jet gas input!")
+            gas_idx += 1
+            still_falling = current_shape.move_down(rocks)
+        # Adjust rock set and height max
+        new_rocks = current_shape.get_blocks()
+        old_max = max_y
+        max_y = max(max_y, *[y for x, y in new_rocks])
+        rocks.update(new_rocks)
+        # Record peak shape
+        max_heights[shape_idx] = max_y
+        dy = max_y - old_max
+        for i in range(len(peaks)):
+            peaks[i] -= dy
+        for x, y in new_rocks:
+            peaks[x] = max(peaks[x], y - max_y)
+        state = (shape_idx % len(shapes), gas_idx % len(jetstream), tuple(peaks))
+        if state in states_seen and n > 10 ** 5:
+            # Found cycle!
+            n_prev_shape = states_seen[state]
+            prev_max_h = max_heights[n_prev_shape]
+            cycle_height_change = max_y - prev_max_h
+            cycle_length = shape_idx - n_prev_shape
+            target = n - n_prev_shape
+            cycles = target // cycle_length
+            leftover_height_change = max_heights[n_prev_shape + (target % cycle_length)] - prev_max_h
+            return prev_max_h + (cycle_height_change * cycles) + leftover_height_change
+        states_seen[state] = shape_idx
+        # Move to next shape
+        shape_idx += 1
+        current_shape = shapes[shape_idx % len(shapes)].make(max_y)
     return max_y + 1
 
 
