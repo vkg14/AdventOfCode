@@ -125,7 +125,7 @@ def solve(filename, n=1000000000000):
             for x, y in new_rocks:
                 peaks[x] = max(peaks[x], y - max_y)
             state = (shape_idx % len(shapes), gas_idx % len(jetstream), tuple(peaks))
-            if state in states_seen and n > 10 ** 6:
+            if state in states_seen and n > 10 ** 5:
                 # Found cycle!
                 n_prev_shape = states_seen[state]
                 prev_max_h = max_heights[n_prev_shape]
