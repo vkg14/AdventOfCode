@@ -6,7 +6,7 @@ def read_input(filename):
     with open(filename) as f:
         for line in f:
             sp = list(line.rstrip('\n'))
-            return [1 if x == '>' else -1 for x in sp]
+            return [1 if x == '>' else 0 for x in sp]
 
 
 @dataclass
@@ -94,12 +94,11 @@ class Square(Shape):
         return [(self.x + i, self.y + j) for i in range(2) for j in range(2)]
 
 
-def solve(filename, part_two=True):
+def solve(filename, n=10**12):
     jetstream = read_input(filename)
     shapes = [FlatLine, Cross, LShape, VerticalLine, Square]
     shape_idx, gas_idx, max_y = 0, 0, -1
-    n = 1000000000000 if part_two else 2022
-    jetstream_methods = {-1: Shape.move_left, 1: Shape.move_right}
+    jetstream_methods = [Shape.move_left, Shape.move_right]
     rocks = set()
     # New tracking for cycle detection
     peaks = [0] * 7
@@ -109,7 +108,8 @@ def solve(filename, part_two=True):
         current_shape = shapes[shape_idx % len(shapes)].make(max_y)
         still_falling = True
         while still_falling:
-            jetstream_methods[jetstream[gas_idx % len(jetstream)]](current_shape, rocks)
+            method_idx = jetstream[gas_idx % len(jetstream)]
+            jetstream_methods[method_idx](current_shape, rocks)
             gas_idx += 1
             still_falling = current_shape.move_down(rocks)
         # Adjust rock set and height max
@@ -134,13 +134,13 @@ def solve(filename, part_two=True):
             print(f'Found cycle from {n_prev_shape} to {shape_idx} with (h, l): {cycle_height_change}, {cycle_length}.')
             # Need to cycle simulate till shape_idx == n-1 (0-indexed)
             target = n - n_prev_shape - 1
-            cycles = target // cycle_length
+            n_cycles = target // cycle_length
             # The excess height to be added is a sum of the initial height before cycle detection and
             # the height of the leftover *after* the final completed cycle.  This can be
             # represented as prev_max_h + (max_heights[n_prev_shape + (target_cycle_offset)] - prev_max_h) + 1
             # Need to add 1 here since our max_y is 0-indexed.
             height_add_on = max_heights[n_prev_shape + (target % cycle_length)] + 1
-            return cycle_height_change * cycles + height_add_on
+            return cycle_height_change * n_cycles + height_add_on
         states_seen[state] = shape_idx
         # Move to next shape
         shape_idx += 1
@@ -148,7 +148,7 @@ def solve(filename, part_two=True):
 
 
 if __name__ == '__main__':
-    print(solve("example17.txt", part_two=False))
-    print(solve("input17.txt", part_two=False))
+    print(solve("example17.txt", n=2022))
+    print(solve("input17.txt", n=2022))
     print(solve("example17.txt"))
     print(solve("input17.txt"))
