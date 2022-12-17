@@ -125,17 +125,22 @@ def solve(filename, part_two=True):
         for x, y in new_rocks:
             peaks[x] = max(peaks[x], y - max_y)
         state = (shape_idx % len(shapes), gas_idx % len(jetstream), tuple(peaks))
-        if state in states_seen and part_two:
+        if state in states_seen:
             # Found cycle!
             n_prev_shape = states_seen[state]
             prev_max_h = max_heights[n_prev_shape]
             cycle_height_change = max_y - prev_max_h
             cycle_length = shape_idx - n_prev_shape
+            print(f'Found cycle from {n_prev_shape} to {shape_idx} with (h, l): {cycle_height_change}, {cycle_length}.')
             # Need to cycle simulate till shape_idx == n-1 (0-indexed)
             target = n - n_prev_shape - 1
             cycles = target // cycle_length
-            leftover_height_change = max_heights[n_prev_shape + (target % cycle_length)] - prev_max_h
-            return prev_max_h + (cycle_height_change * cycles) + leftover_height_change + 1
+            # The excess height to be added is a sum of the initial height before cycle detection and
+            # the height of the leftover *after* the final completed cycle.  This can be
+            # represented as prev_max_h + (max_heights[n_prev_shape + (target_cycle_offset)] - prev_max_h) + 1
+            # Need to add 1 here since our max_y is 0-indexed.
+            height_add_on = max_heights[n_prev_shape + (target % cycle_length)] + 1
+            return cycle_height_change * cycles + height_add_on
         states_seen[state] = shape_idx
         # Move to next shape
         shape_idx += 1
