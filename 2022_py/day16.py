@@ -130,7 +130,7 @@ def solve_part1_top_down(filename):
 def solve_part1_dfs(filename):
     graph = parse_input(filename)
     # You know that flow rate of 'AA' is always 0.
-    return dfs('AA', 0, 30, graph, dict())
+    return dfs('AA', 0, 30, graph, dict())[0]
 
 
 def solve_part1_bfs(filename):
@@ -138,27 +138,34 @@ def solve_part1_bfs(filename):
     return bfs(30, graph.apsp, graph.rates, graph.non_zero_valves)
 
 
-def dfs(curr: str, opened: int, iterations: int, graph: ValveGraph, cache, target_flow=-math.inf):
-    m = 0
-    if (curr, iterations, opened) in cache:
-        return cache[(curr, iterations, opened)]
-    if iterations == 0 or graph.all_valves_open(opened):
-        return 0
-    if target_flow > 0 and graph.get_complement_flow_rate(opened) * (iterations - 1) < target_flow:
-        # Shortcut with max flow rate
-        return 0
-    for adj, steps in graph.apsp[curr].items():
-        # We want to move to and open a valve
-        n_move_and_open = steps + 1
-        if graph.is_valve_open(adj, opened) or n_move_and_open > iterations:
-            # Ignore opened and too-distant valves
-            continue
-        opened_new = graph.set_valve_bit(adj, opened)
-        flow_unlocked = graph.rates[adj] * (iterations - n_move_and_open)
-        m = max(m, dfs(adj, opened_new, iterations - n_move_and_open, graph, cache,
-                       target_flow - flow_unlocked) + flow_unlocked)
-    cache[(curr, iterations, opened)] = m
-    return m
+def dfs(c: str, o: int, i: int, graph: ValveGraph, cache, tf=-math.inf):
+    max_per_subset = defaultdict(int)
+
+    def dfs_helper(curr: str, opened: int, iterations: int, target_flow=-math.inf):
+        m = 0
+        if (curr, iterations, opened) in cache:
+            return cache[(curr, iterations, opened)]
+        if iterations == 0 or graph.all_valves_open(opened):
+            return 0
+        if target_flow > 0 and graph.get_complement_flow_rate(opened) * (iterations - 1) < target_flow:
+            # Shortcut with max flow rate
+            return 0
+        for adj, steps in graph.apsp[curr].items():
+            # We want to move to and open a valve
+            n_move_and_open = steps + 1
+            if graph.is_valve_open(adj, opened) or n_move_and_open > iterations:
+                # Ignore opened and too-distant valves
+                continue
+            opened_new = graph.set_valve_bit(adj, opened)
+            flow_unlocked = graph.rates[adj] * (iterations - n_move_and_open)
+            m = max(m, dfs_helper(adj, opened_new, iterations - n_move_and_open,
+                                  target_flow - flow_unlocked) + flow_unlocked)
+        cache[(curr, iterations, opened)] = m
+        max_per_subset[opened] = max(m, max_per_subset[opened])
+        return m
+
+    dfs_helper(c, o, i, tf)
+    return max_per_subset
 
 
 def bfs(iterations, apsp, rates, target_set):
@@ -180,10 +187,9 @@ def bfs(iterations, apsp, rates, target_set):
     return running_max
 
 
-def half_powerset(iterable):
+def powerset(iterable):
     "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
     s = list(iterable)
-    start = len(s) // 2
     return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
 
 
@@ -192,15 +198,25 @@ def solve_part2(filename):
     max_seen = 0
     cache = dict()
     powerset_length = 2 ** len(graph.non_zero_valves)
-    for i, subset in enumerate(half_powerset(graph.non_zero_valves), 1):
+    for i, subset in enumerate(powerset(graph.non_zero_valves), 1):
         # Use complementary subsets for both elephant and you.
         my_subset = graph.get_open_subset(subset)
         elephant_subset = (1 << len(graph.non_zero_valves)) - my_subset - 1
-        m1 = dfs('AA', my_subset, 26, graph, cache)
-        m2 = dfs('AA', elephant_subset, 26, graph, cache, target_flow=max_seen-m1)
+        m1 = dfs('AA', my_subset, 26, graph, cache)[my_subset]
+        m2 = dfs('AA', elephant_subset, 26, graph, cache, tf=max_seen - m1)[elephant_subset]
         max_seen = max(max_seen, m1 + m2)
         if i == powerset_length // 2:
             break
+    return max_seen
+
+
+def solve_part2_fast(filename):
+    graph = parse_input(filename)
+    max_per_subset = dfs('AA', 0, 26, graph, dict())
+    max_seen = 0
+    for subset, flow in max_per_subset.items():
+        complement = (1 << len(graph.non_zero_valves)) - subset - 1
+        max_seen = max(max_seen, flow + max_per_subset.get(complement, 0))
     return max_seen
 
 
