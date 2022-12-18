@@ -31,20 +31,20 @@ def solve(filename: str):
     p1_res, cubes, min_coords, max_coords = part_one(filename)
     # Start search one x-coord below the min tuple point
     start = tuple(map(add, min(cubes), (-1, 0, 0)))
+    n_dims = len(start)
     visited = {start}
     q = deque([start])
     p2_res = 0
     while q:
         nxt = q.popleft()
         for adjacent in get_neighbors(nxt):
-            if adjacent in visited:
+            if any(adjacent[dim] < min_coords[dim] or adjacent[dim] > max_coords[dim] for dim in
+                   range(n_dims)) or adjacent in visited:
                 continue
             # Any reachable cube is an exposed face - each outer point can reach multiple cubes and multiple
             # outer points can reach same cube but these hit different exposed faces.
             if adjacent in cubes:
                 p2_res += 1
-                continue
-            if any(adjacent[dim] < min_coords[dim] or adjacent[dim] > max_coords[dim] for dim in range(len(adjacent))):
                 continue
             visited.add(adjacent)
             q.append(adjacent)
