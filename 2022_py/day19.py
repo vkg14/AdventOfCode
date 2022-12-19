@@ -25,22 +25,18 @@ def time_to_build_robot(cost, robots, elements):
     time_to_collect = 0
     for element, c in cost.items():
         needed = c - elements[element]
-        time_needed = math.inf if not robots[element] else math.ceil(needed / robots[element])
+        if not robots[element]:
+            # We cannot currently make this material
+            return math.inf
+        time_needed = math.ceil(needed / robots[element])
         time_to_collect = max(time_to_collect, time_needed)
     return time_to_collect
 
 
-def construct_state(bp, robots, elements, minute):
+def construct_state(robots, elements, minute):
     # The state is the number of robots and elements we have at the end of some minute
-    state = []
-    for e in sorted(bp.keys()):
-        state.extend([robots[e], elements[e]])
-    state.append(minute)
-    return tuple(state)
-
-
-def max_cost(element, bp):
-    return max(bp[r].get(element, 0) for r in bp)
+    materials = ['ore', 'clay', 'obsidian', 'geode']
+    return tuple(robots[e] for e in materials) + tuple(elements[e] for e in materials) + (minute,)
 
 
 def solve_blueprint(bp, n=24):
@@ -54,9 +50,10 @@ def solve_blueprint(bp, n=24):
     s_robots = defaultdict(int)
     s_robots['ore'] = 1
     s_elements = defaultdict(int)
+    max_costs = {element: max(bp[r].get(element, 0) for r in bp) for element in bp}
     minute = 0
     q = deque([(s_robots, s_elements, minute)])
-    visited = {construct_state(bp, s_robots, s_elements, minute)}
+    visited = {construct_state(s_robots, s_elements, minute)}
     max_seen = 0
     while q:
         robots, elements, minute = q.popleft()
@@ -72,7 +69,7 @@ def solve_blueprint(bp, n=24):
                 time_to_build_robot(
                     bp[r], robots, elements
                     # Optimization for pruning: don't make a robot we already have enough to cover any build cost
-            ) if r == 'geode' or robots[r] < max_cost(r, bp) else math.inf, r)
+                ) if r == 'geode' or robots[r] < max_costs[r] else math.inf, r)
             for r in bp]
         for t, robot in sorted(fast_forward_times):
             cost = bp[robot]
@@ -90,16 +87,15 @@ def solve_blueprint(bp, n=24):
             for e in bp:
                 if e == 'geode':
                     continue
-                max_cost_e = max_cost(e, bp)
                 time_left = n - (minute + t + 1)
-                max_usable_e = time_left * max_cost_e - robots_new[e] * (time_left - 1)
+                max_usable_e = time_left * max_costs[e] - robots_new[e] * (time_left - 1)
                 elements_new[e] = min(elements_new[e], max_usable_e)
-            state = construct_state(bp, robots_new, elements_new, minute + t + 1)
+            state = construct_state(robots_new, elements_new, minute + t + 1)
             if state not in visited:
                 visited.add(state)
                 q.append((robots_new, elements_new, minute + t + 1))
                 # Prune all states past where the next geode and obsidian are make-able
-                if robot in ['geode', 'obsidian']:
+                if robot == 'geode':
                     break
     return max_seen
 
@@ -128,5 +124,5 @@ def solve_part_two(filename: str):
 if __name__ == '__main__':
     # print(solve("example19.txt"))
     # print(solve("input19.txt"))
-    print(solve_part_two("example19.txt"))
-    # print(solve_part_two("input19.txt"))
+    # print(solve_part_two("example19.txt"))
+    print(solve_part_two("input19.txt"))
