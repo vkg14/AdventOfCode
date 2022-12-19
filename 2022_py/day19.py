@@ -60,33 +60,47 @@ def solve_blueprint(bp, n=24):
     max_seen = 0
     while q:
         robots, elements, minute = q.popleft()
-        max_seen = max(max_seen, elements['geode'] + robots['geode'] * (n - minute))
-        for robot, cost in bp.items():
-            # Optimization for pruning: don't make a robot we already have enough to cover any build cost
-            if robot != 'geode' and robots[robot] == max_cost(robot, bp):
-                # Don't consider making this robot
-                continue
-            t = time_to_build_robot(cost, robots, elements)
-            if minute + t + 1 < n:
-                e_copy = elements.copy()
-                r_copy = robots.copy()
-                for r in robots:
-                    e_copy[r] += robots[r] * (t + 1)
-                for e in cost:
-                    e_copy[e] -= cost[e]
-                r_copy[robot] += 1
-                # Optimization: collapse all states with excess elements to the max consumable amount
-                for e in bp:
-                    if e == 'geode':
-                        continue
-                    max_cost_e = max_cost(e, bp)
-                    time_left = n - (minute + t + 1)
-                    max_usable_e = time_left * max_cost_e - r_copy[e] * (time_left - 1)
-                    e_copy[e] = min(e_copy[e], max_usable_e)
-                state = construct_state(bp, r_copy, e_copy, minute + t + 1)
-                if state not in visited:
-                    visited.add(state)
-                    q.append((r_copy, e_copy, minute + t + 1))
+        guaranteed_geodes = elements['geode'] + robots['geode'] * (n - minute)
+        max_seen = max(max_seen, guaranteed_geodes)
+        # Optimization: you can only make (t-1) * t / 2 geodes given t time steps including the current.
+        max_potential_geodes = (n - minute - 1) * (n - minute) // 2
+        if max_seen > guaranteed_geodes + max_potential_geodes:
+            continue
+        # Fast-forward state to the time *after* building the next robot
+        fast_forward_times = [
+            (
+                time_to_build_robot(
+                    bp[r], robots, elements
+                    # Optimization for pruning: don't make a robot we already have enough to cover any build cost
+            ) if r == 'geode' or robots[r] < max_cost(r, bp) else math.inf, r)
+            for r in bp]
+        for t, robot in sorted(fast_forward_times):
+            cost = bp[robot]
+            if minute + t + 1 >= n:
+                # Not enough time to make this robot.
+                break
+            elements_new = elements.copy()
+            robots_new = robots.copy()
+            for r in robots:
+                elements_new[r] += robots[r] * (t + 1)
+            for e in cost:
+                elements_new[e] -= cost[e]
+            robots_new[robot] += 1
+            # Optimization: collapse all states with excess elements to the max consumable amount
+            for e in bp:
+                if e == 'geode':
+                    continue
+                max_cost_e = max_cost(e, bp)
+                time_left = n - (minute + t + 1)
+                max_usable_e = time_left * max_cost_e - robots_new[e] * (time_left - 1)
+                elements_new[e] = min(elements_new[e], max_usable_e)
+            state = construct_state(bp, robots_new, elements_new, minute + t + 1)
+            if state not in visited:
+                visited.add(state)
+                q.append((robots_new, elements_new, minute + t + 1))
+                # Prune all states past where the next geode and obsidian are make-able
+                if robot in ['geode', 'obsidian']:
+                    break
     return max_seen
 
 
@@ -105,7 +119,6 @@ def solve_part_two(filename: str):
     res = 1
     for bp_id, bp in bp_gen:
         geocodes = solve_blueprint(bp, n=32)
-        print(bp_id, bp, geocodes)
         res *= geocodes
         if bp_id == 3:
             break
@@ -113,7 +126,7 @@ def solve_part_two(filename: str):
 
 
 if __name__ == '__main__':
-    print(solve("example19.txt"))
-    print(solve("input19.txt"))
+    # print(solve("example19.txt"))
+    # print(solve("input19.txt"))
     print(solve_part_two("example19.txt"))
-    print(solve_part_two("input19.txt"))
+    # print(solve_part_two("input19.txt"))
