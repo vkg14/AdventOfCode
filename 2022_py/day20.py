@@ -53,28 +53,18 @@ def solve(filename: str, mult=1, times=1):
     zero = None
     for k in range(n * times):
         curr = q.popleft()
-        if curr.val > 0:
+        if curr.val != 0:
+            move = curr.val % (n-1)
             curr.prev.nxt = curr.nxt
             curr.nxt.prev = curr.prev
             tmp = curr
-            for j in range(curr.val % (n - 1)):
+            for j in range(move):
                 tmp = tmp.nxt
             tmp2 = tmp.nxt
             tmp.nxt = curr
             curr.prev = tmp
             tmp2.prev = curr
             curr.nxt = tmp2
-        elif curr.val < 0:
-            curr.nxt.prev = curr.prev
-            curr.prev.nxt = curr.nxt
-            tmp = curr
-            for j in range(abs(curr.val) % (n - 1)):
-                tmp = tmp.prev
-            tmp2 = tmp.prev
-            tmp2.nxt = curr
-            curr.prev = tmp2
-            tmp.prev = curr
-            curr.nxt = tmp
         else:
             zero = curr
         q.append(curr)
