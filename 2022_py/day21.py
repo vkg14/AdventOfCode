@@ -56,27 +56,28 @@ def solve(filename):
     return int(dfs('root', dict(), monkeys))
 
 
+def try_humn_value(start, monkeys, val):
+    monkeys['humn'].value = val
+    return dfs(start, dict(), monkeys)
+
+
 def solve_part_two(filename):
     monkeys = read_input(filename)
 
     root_children = monkeys['root'].children
-    monkeys['humn'].value = 0
-    c0 = dfs(root_children[0], dict(), monkeys)
-    monkeys['humn'].value = 1
-    c1 = dfs(root_children[0], dict(), monkeys)
+    c0 = try_humn_value(root_children[0], monkeys, 0)
+    c1 = try_humn_value(root_children[0], monkeys, 1)
     if c0 == c1:
         t = c0
         dependent = root_children[1]
     else:
         t = dfs(root_children[1], dict(), monkeys)
         dependent = root_children[0]
-    monkeys['humn'].value = 0
-    d0 = dfs(dependent, dict(), monkeys)
-    monkeys['humn'].value = 1
-    d1 = dfs(dependent, dict(), monkeys)
+    d0 = try_humn_value(dependent, monkeys, 0)
+    d1 = try_humn_value(dependent, monkeys, 1)
     same_direction = d1 > d0
     lower_bound = 0
-    # Higher bound chosen by iterating
+    # Higher bound chosen through trial and error
     higher_bound = 10**15
     while lower_bound < higher_bound:
         midpoint = (lower_bound + higher_bound) // 2
