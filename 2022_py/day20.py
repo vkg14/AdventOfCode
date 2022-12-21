@@ -71,8 +71,41 @@ def solve(filename: str, mult=1, times=1):
     return get_n_from(zero, 1000 % n) + get_n_from(zero, 2000 % n) + get_n_from(zero, 3000 % n)
 
 
+def jenn_solve(filename: str):
+    nums = []
+    num_dict = {}
+    with open(filename) as file:
+        i = 0
+        for line in file.readlines():
+            num = int(line.strip()) * 811589153
+            nums.append((i, num))
+            num_dict[i] = num
+            i += 1
+
+    copy = nums[::]
+    for c in range(10):
+        copy = copy[::]
+        for i in range(len(nums)):
+            num_to_move = num_dict[i]
+            current_i = copy.index((i, num_to_move))
+            new_i = (current_i + num_to_move) % (len(nums) - 1)
+
+            if current_i < new_i:
+                copy = copy[:current_i] + copy[current_i + 1:new_i + 1] + [(i, num_to_move)] + copy[new_i + 1:]
+
+            elif current_i > new_i:
+                copy = copy[:new_i] + [(i, num_to_move)] + copy[new_i:current_i] + copy[current_i + 1:]
+
+    vals = [x[1] for x in copy]
+    zero_index = vals.index(0)
+    return sum([
+        vals[(zero_index + i) % len(vals)] for i in [1000, 2000, 3000]
+    ])
+
+
 if __name__ == '__main__':
-    print(solve("example20.txt"))
-    print(solve("input20.txt"))
-    print(solve("example20.txt", mult=811589153, times=10))
+    # print(solve("example20.txt"))
+    # print(solve("input20.txt"))
+    # print(solve("example20.txt", mult=811589153, times=10))
     print(solve("input20.txt", mult=811589153, times=10))
+    print(jenn_solve("input20.txt"))
