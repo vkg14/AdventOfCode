@@ -63,7 +63,10 @@ def try_humn_value(start, monkeys, val):
 
 def solve_part_two(filename):
     monkeys = read_input(filename)
-
+    # Assumption: only one side depends on 'humn' - find it and binary search on the other.
+    # 'humn' has a consistent linear relationship with the other side so increasing / decreasing humn
+    # should move that half of the expression in one consistent direction.  Additionally, 'humn' is a
+    # leaf in both inputs but this shouldn't impact much about the approach.
     root_children = monkeys['root'].children
     c0 = try_humn_value(root_children[0], monkeys, 0)
     c1 = try_humn_value(root_children[0], monkeys, 1)
