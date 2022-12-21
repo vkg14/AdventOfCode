@@ -81,8 +81,7 @@ def solve_part_two(filename):
     higher_bound = 10**15
     while lower_bound < higher_bound:
         midpoint = (lower_bound + higher_bound) // 2
-        monkeys['humn'].value = midpoint
-        diff = t - dfs(dependent, dict(), monkeys)
+        diff = t - try_humn_value(dependent, monkeys, midpoint)
         if diff > 0:
             if same_direction:
                 # humn needs to be higher
