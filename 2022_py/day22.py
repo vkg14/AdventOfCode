@@ -49,7 +49,7 @@ def get_next_position(curr, move, grid):
         r += dr
         c += dc
 
-    # If we wall, we are still stuck on other side of portal
+    # If we hit wall, we are still stuck on other side of portal
     if grid[r - dr][c - dc] == '#':
         return curr
     else:
