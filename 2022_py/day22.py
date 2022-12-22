@@ -67,7 +67,6 @@ def get_next_position_cube(curr, move, grid):
             return (nxt_r, nxt_c), move
     old_move = move
     if old_move == (0, 1):
-        # right
         if nxt_r in range(50):
             # Moves from east face to the south face
             nxt, move = (49 - nxt_r + 100, 99), (0, -1)
@@ -89,7 +88,6 @@ def get_next_position_cube(curr, move, grid):
             # East to bottom
             nxt, move = (nxt_c - 50, 99), (0, -1)
     elif old_move == (0, -1):
-        # left
         if nxt_r in range(0, 50):
             # Moves from north face to west face
             nxt, move = (149 - nxt_r, 0), (0, 1)
@@ -104,10 +102,13 @@ def get_next_position_cube(curr, move, grid):
             nxt, move = (0, nxt_r - 100), (1, 0)
     elif old_move == (-1, 0):
         if nxt_c in range(0, 50):
+            # West to bottom face
             nxt, move = (nxt_c + 50, 50), (0, 1)
         if nxt_c in range(50, 100):
+            # North to top face
             nxt, move = (100 + nxt_c, 0), (0, 1)
         if nxt_c in range(100, 150):
+            # East to top face
             nxt, move = (199, nxt_c - 100), (-1, 0)
     else:
         raise Exception(f"Unknown move direction: {old_move}")
