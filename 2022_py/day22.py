@@ -69,7 +69,7 @@ def get_next_position_cube(curr, move, grid):
     if old_move == (0, 1):
         if nxt_r in range(50):
             # Moves from east face to the south face
-            nxt, move = (49 - nxt_r + 100, 99), (0, -1)
+            nxt, move = (149 - nxt_r, 99), (0, -1)
         if nxt_r in range(50, 100):
             # Moves from bottom face to the east face
             nxt, move = (49, nxt_r + 50), (-1, 0)
@@ -83,7 +83,7 @@ def get_next_position_cube(curr, move, grid):
         if nxt_c in range(50):
             nxt, move = (0, nxt_c + 100), (1, 0)
         if nxt_c in range(50, 100):
-            nxt, move = (150 + nxt_c - 50, 49), (0, -1)
+            nxt, move = (100 + nxt_c, 49), (0, -1)
         if nxt_c in range(100, 150):
             # East to bottom
             nxt, move = (nxt_c - 50, 99), (0, -1)
