@@ -1,4 +1,5 @@
 from collections import defaultdict
+from operator import add
 
 import math
 
@@ -14,6 +15,10 @@ def read_input(filename: str):
     return elves
 
 
+def tuple_sum(tup1, tup2):
+    return tuple(map(add, tup1, tup2))
+
+
 def proposed_move(elf, idx, elves):
     surrounding_positions = [(-1, 0), (-1, 1), (-1, -1), (1, 0), (1, 1), (1, -1), (0, 1), (0, -1)]
     checks = [
@@ -23,16 +28,16 @@ def proposed_move(elf, idx, elves):
         [(-1, 1), (0, 1), (1, 1)]
     ]
     # Does not move when empty around it
-    if all(tuple([sum(x) for x in zip(*[elf, move])]) not in elves for move in surrounding_positions):
-        return elf, elf
+    if all(tuple_sum(elf, move) not in elves for move in surrounding_positions):
+        return elf
 
     for i in range(4):
         check = checks[(idx + i) % 4]
-        if all(tuple([sum(x) for x in zip(*[elf, move])]) not in elves for move in check):
-            return elf, tuple([sum(x) for x in zip(*[elf, check[1]])])
+        if all(tuple_sum(elf, move) not in elves for move in check):
+            return tuple_sum(elf, check[1])
 
-    # Elf has another elf in every surrounding position
-    return elf, elf
+    # Elf has another elf in every surrounding "check"
+    return elf
 
 
 def solve(filename: str, n=10):
@@ -41,7 +46,7 @@ def solve(filename: str, n=10):
     for i in range(n):
         next_moves = defaultdict(list)
         for elf in elves:
-            elf, nxt = proposed_move(elf, idx, elves)
+            nxt = proposed_move(elf, idx, elves)
             if elf == nxt:
                 continue
             next_moves[nxt].append(elf)
