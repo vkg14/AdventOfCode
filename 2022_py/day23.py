@@ -9,9 +9,7 @@ def read_input(filename: str):
     with open(filename) as f:
         for i, line in enumerate(f):
             sp = [*line.rstrip('\n')]
-            for j in range(len(sp)):
-                if sp[j] == '#':
-                    elves.add((i, j))
+            elves.update((i, j) for j in range(len(sp)) if sp[j] == '#')
     return elves
 
 
