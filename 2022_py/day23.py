@@ -31,13 +31,13 @@ def proposed_move(elf, idx, elves):
         if all(tuple([sum(x) for x in zip(*[elf, move])]) not in elves for move in check):
             return elf, tuple([sum(x) for x in zip(*[elf, check[1]])])
 
+    # Elf has another elf in every surrounding position
     return elf, elf
 
 
 def solve(filename: str, n=10):
     elves = read_input(filename)
     idx = 0
-    rounds = 1
     for i in range(n):
         next_moves = defaultdict(list)
         for elf in elves:
@@ -46,7 +46,7 @@ def solve(filename: str, n=10):
                 continue
             next_moves[nxt].append(elf)
         no_move = True
-        for nxt in next_moves.keys():
+        for nxt in next_moves:
             if len(next_moves[nxt]) > 1:
                 continue
             no_move = False
@@ -54,9 +54,9 @@ def solve(filename: str, n=10):
             elves.remove(elf)
             elves.add(nxt)
         if no_move:
-            return rounds
+            # Number of rounds to reach no move
+            return idx + 1
         idx += 1
-        rounds += 1
 
     max_r = -math.inf
     max_c = -math.inf
