@@ -22,22 +22,13 @@ def proposed_move(elf, idx, elves):
         [(-1, -1), (0, -1), (1, -1)],
         [(-1, 1), (0, 1), (1, 1)]
     ]
-    no_move = True
-    for move in surrounding_positions:
-        if tuple([sum(x) for x in zip(*[elf, move])]) in elves:
-            no_move = False
-            break
-    if no_move:
+    # Does not move when empty around it
+    if all(tuple([sum(x) for x in zip(*[elf, move])]) not in elves for move in surrounding_positions):
         return elf, elf
 
     for i in range(4):
         check = checks[(idx + i) % 4]
-        can_move = True
-        for move in check:
-            if tuple([sum(x) for x in zip(*[elf, move])]) in elves:
-                can_move = False
-                break
-        if can_move:
+        if all(tuple([sum(x) for x in zip(*[elf, move])]) not in elves for move in check):
             return elf, tuple([sum(x) for x in zip(*[elf, check[1]])])
 
     return elf, elf
