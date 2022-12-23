@@ -63,15 +63,10 @@ def solve(filename: str, n=10):
             return idx + 1
         idx += 1
 
-    max_r = -math.inf
-    max_c = -math.inf
-    min_r = math.inf
-    min_c = math.inf
-    for r, c in elves:
-        max_r = max(max_r, r)
-        min_r = min(min_r, r)
-        max_c = max(max_c, c)
-        min_c = min(min_c, c)
+    max_r = max(r for r, _ in elves)
+    min_r = min(r for r, _ in elves)
+    max_c = max(c for _, c in elves)
+    min_c = min(c for _, c in elves)
     return (max_r - min_r + 1) * (max_c - min_c + 1) - len(elves)
 
 
