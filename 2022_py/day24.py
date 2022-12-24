@@ -14,7 +14,7 @@ def read_input(filename: str):
         'v': (1, 0)
     }
     start = None
-    end = (0, 0)
+    end = None
     with open(filename) as f:
         for i, line in enumerate(f):
             sp = [*line.rstrip('\n')]
