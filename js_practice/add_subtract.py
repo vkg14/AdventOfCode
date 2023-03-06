@@ -2,6 +2,11 @@ from collections import deque
 from typing import List, Union
 
 
+def reverse_all(*lists):
+    for iterable in lists:
+        iterable.reverse()
+
+
 def sum_digits(left, right, carry):
     nxt = left + right + carry
     carry = nxt // 10
@@ -14,20 +19,15 @@ def add(left: List[int], right: List[int]) -> List[int]:
         return add(right, left)
     carry = 0
     result = deque()
-    iter_length = len(right)
-    left.reverse()
-    right.reverse()
-    for i in range(iter_length):
-        nxt, carry = sum_digits(left[i], right[i], carry)
-        result.appendleft(nxt)
-    leftover = left[iter_length:]
-    for digit in leftover:
-        nxt, carry = sum_digits(digit, 0, carry)
+    reverse_all(left, right)
+    for i in range(len(left)):
+        right_digit = right[i] if i < len(right) else 0
+        nxt, carry = sum_digits(left[i], right_digit, carry)
         result.appendleft(nxt)
     if carry:
         result.appendleft(carry)
-    left.reverse()
-    right.reverse()
+    # Undo reversal
+    reverse_all(left, right)
     return list(result)
 
 
@@ -38,8 +38,7 @@ def is_lt(left: List[int], right: List[int]):
 def sub(left: List[int], right: List[int]) -> List[Union[int, str]]:
     if is_lt(left, right):
         return ['-'] + sub(right, left)
-    left.reverse()
-    right.reverse()
+    reverse_all(left, right)
     current_carry = 0
     next_carry = 0
     result = deque()
@@ -53,8 +52,7 @@ def sub(left: List[int], right: List[int]) -> List[Union[int, str]]:
         current_carry = next_carry
         next_carry = 0
     # Undo reversal
-    left.reverse()
-    right.reverse()
+    reverse_all(left, right)
     return list(result)
 
 
