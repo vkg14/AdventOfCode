@@ -12,12 +12,13 @@ from tabulate import tabulate
 class Snake:
     INPUT_MAP = {'up': (-1, 0), 'down': (1, 0), 'left': (0, -1), 'right': (0, 1)}
 
-    def __init__(self, dim: int, start: List[Tuple[int, int]], food: Tuple[int, int]):
+    def __init__(self, dim: int, start: List[Tuple[int, int]]):
         self.dim = dim
         self.body = deque(start)
         self.occupied = set(start)
-        self.food = food
         self.game_over = False
+        self.food = None
+        self.respawn_food()
 
     def __hash__(self):
         frozen = frozenset(self.occupied)
@@ -125,7 +126,7 @@ def display_snake_game(snake):
 
 
 def simulate(max_score=10):
-    snake = Snake(6, [(1, 2), (1, 3), (1, 4)], (4, 4))
+    snake = Snake(10, [(1, 2), (1, 3), (1, 4)])
     display_snake_game(snake)
     moves = snake_ai_search(snake)
     while moves and len(snake.body) < max_score:
@@ -138,4 +139,4 @@ def simulate(max_score=10):
 
 
 if __name__ == '__main__':
-    simulate(30)
+    simulate(50)
