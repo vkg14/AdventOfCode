@@ -147,6 +147,7 @@ class Solver:
         - find the least constrained cell, try a solution and propagate forward, backtracking if necessary
         """
         while self.set_immediately_solvable():
+            # Repeatedly fill-in all 1-candidate cells till there are no more.
             pass
 
         first_empty = self.find_min_constrained()
