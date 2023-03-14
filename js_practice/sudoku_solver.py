@@ -86,6 +86,15 @@ class Solver:
         else:
             return None
 
+    def find_next_empty(self, cell) -> Optional[Tuple[int, int]]:
+        nxt = self.get_next_cell(*cell)
+        while nxt:
+            r, c = nxt
+            if self.board[r][c] == '.':
+                return nxt
+            nxt = self.get_next_cell(r, c)
+        return None
+
     def construct_pri_queue(self):
         heap = []
         for r in range(9):
@@ -131,38 +140,16 @@ class Solver:
                     cell = r, c
         return cell if m < 9 else None
 
-    def find_min_constrained_in_row(self, r):
-        try:
-            return min(
-                (
-                    len(self.get_remaining_for_cell(r, c)),
-                    r,
-                    c
-                ) for c in range(9) if not self.board[r][c].isdigit()
-            )[1:]
-        except ValueError:
-            return self.find_min_constrained()
-
-    def find_next_empty(self, cell) -> Optional[Tuple[int, int]]:
-        nxt = self.get_next_cell(*cell)
-        while nxt:
-            r, c = nxt
-            if self.board[r][c] == '.':
-                return nxt
-            nxt = self.get_next_cell(r, c)
-        return None
-
     def solve_sudoku(self) -> None:
         """
-        Do not return anything, modify board in-place instead.
+        This sudoku solver follows 2 steps:
+        - fill in all single-candidate cells until there are no more
+        - find the least constrained cell, try a solution and propagate forward, backtracking if necessary
         """
         while self.set_immediately_solvable():
             pass
 
-        if not self.use_cached:
-            first_empty = (0, 0) if board[0][0] == '.' else self.find_next_empty((0, 0))
-        else:
-            first_empty = self.find_min_constrained()
+        first_empty = self.find_min_constrained()
         if not first_empty or self.recursive_solver(first_empty):
             print("SOLVED!")
         else:
@@ -188,10 +175,7 @@ class Solver:
         r, c = cell
         for val in self.get_remaining_for_cell(r, c):
             self.assign_val(r, c, val)
-            if not self.use_cached:
-                nxt_cell = self.find_next_empty(cell)
-            else:
-                nxt_cell = self.find_min_constrained()
+            nxt_cell = self.find_min_constrained()
             if not nxt_cell or self.recursive_solver(nxt_cell):
                 # done
                 return True
