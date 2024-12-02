@@ -1,6 +1,6 @@
 import subprocess
 
-SESSION = "53616c7465645f5f6d52ec2ed6632fddc65f8db735600592818aacc0823788cf212a86b7a584caa9e74a30910ed7dbcc33688a7db50c9ada168e766a1d61864c"
+SESSION = "53616c7465645f5f59a74d5dd354ff8e4f265e4fa310668325775821243ee01ec68a5254ffef71989d3c41f75289ecea97107ef6372586af481b6adbd46925a3"
 
 # Grid stuff
 DIRS = [(0, 1), (1, 0), (0, -1), (-1, 0)]
@@ -13,7 +13,7 @@ def in_bounds(t1, m, n):
     return 0 <= r < m and 0 <= c < n
 
 
-def get_input(day, year=2023, useragent='vganesan'):
+def get_input(day, year=2024, useragent='vganesan'):
     cmd = f'curl https://adventofcode.com/{year}/day/{day}/input --cookie "session={SESSION}" -A \'{useragent}\''
     output = subprocess.check_output(cmd, shell=True)
     output = output.decode('utf-8')
