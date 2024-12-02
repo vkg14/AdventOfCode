@@ -12,10 +12,7 @@ def solve_part_one(fname):
     t = 0
     for line in lines:
         l = [int(i) for i in line]
-        increasing = all(l[i] < l[i+1] for i in range(len(l)-1))
-        decreasing = all(l[i] > l[i+1] for i in range(len(l)-1))
-        diffs = all(abs(l[i+1] - l[i]) in [1,2,3] for i in range(len(l)-1))
-        if (increasing or decreasing) and diffs:
+        if passes(l):
             t += 1
     return t
 
