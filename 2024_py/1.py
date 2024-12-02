@@ -15,8 +15,8 @@ def solve_part_two(fname):
     pass
 
 
-def run_solution(day, ex_answer_1=0, ex_answer_2=0, ignore_example=True):
-    example_file = f'inputs/example{day}.txt'
+def run_solution(day, ignore_example=True, ex_answer_1=0, ex_answer_2=0):
+    example_file = f'examples/example{day}.txt'
     input_file = f'inputs/input{day}.txt'
 
     if not ignore_example:
