@@ -13,6 +13,11 @@ def in_bounds(t1, m, n):
     return 0 <= r < m and 0 <= c < n
 
 
+def read_file_split(fname):
+    with open(fname, "r") as f:
+        return [line.split() for line in f]
+
+
 def get_input(day, year=2024, useragent='vganesan'):
     cmd = f'curl https://adventofcode.com/{year}/day/{day}/input --cookie "session={SESSION}" -A \'{useragent}\''
     output = subprocess.check_output(cmd, shell=True)

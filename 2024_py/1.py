@@ -8,14 +8,25 @@ from helpers import *
 
 
 def solve_part_one(fname):
-    pass
+    lines = read_file_split(fname)
+    first = sorted(x[0] for x in lines)
+    second = sorted(x[1] for x in lines)
+    t = 0
+    for f, s in zip(first, second):
+        t += abs(int(f)-int(s))
+    return t
 
 
 def solve_part_two(fname):
-    pass
+    lines = read_file_split(fname)
+    counter = Counter(x[1] for x in lines)
+    t = 0
+    for x in [e[0] for e in lines]:
+        t += int(x) * counter[x]
+    return t
 
 
-def run_solution(day, ignore_example=True, ex_answer_1=0, ex_answer_2=0):
+def run_solution(day, ignore_example=False, ex_answer_1=11, ex_answer_2=31):
     example_file = f'examples/example{day}.txt'
     input_file = f'inputs/input{day}.txt'
 
@@ -29,6 +40,7 @@ def run_solution(day, ignore_example=True, ex_answer_1=0, ex_answer_2=0):
 
     if not ignore_example:
         p2 = solve_part_two(example_file)
+        print(p2)
         assert p2 == ex_answer_2, "Part 2 example case is incorrect."
 
     print("Solution to Part 2:", solve_part_two(input_file))

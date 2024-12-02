@@ -29,6 +29,7 @@ def run_solution(day, ignore_example=True, ex_answer_1=0, ex_answer_2=0):
 
     if not ignore_example:
         p2 = solve_part_two(example_file)
+        print(p2)
         assert p2 == ex_answer_2, "Part 2 example case is incorrect."
 
     print("Solution to Part 2:", solve_part_two(input_file))
