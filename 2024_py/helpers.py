@@ -6,11 +6,17 @@ SESSION = "53616c7465645f5f59a74d5dd354ff8e4f265e4fa310668325775821243ee01ec68a5
 DIRS = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 DIR_NAMES = ['R', 'D', 'L', 'U']
 sum_tuples = lambda tuple1, tuple2: tuple(a + b for a, b in zip(tuple1, tuple2))
+diff_tuples = lambda tuple1, tuple2: tuple(a - b for a, b in zip(tuple1, tuple2))
 
 
 def in_bounds(t1, m, n):
     r, c = t1
     return 0 <= r < m and 0 <= c < n
+
+
+def get_readlines_stripped(fname):
+    with open(fname, "r") as f:
+        return [l.strip() for l in f.readlines()]
 
 
 def read_file_split(fname):
