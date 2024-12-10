@@ -43,6 +43,28 @@ def solve_part_one(fname):
 
 def solve_part_two(fname):
     g, m, n = parse(fname)
+
+    def dfs(graph, pos):
+        val = graph[pos]
+        if val == 9:
+            return 1
+        total = 0
+        for d in DIRS:
+            neighbor = sum_tuples(pos, d)
+            if in_bounds(neighbor, m, n) and graph[neighbor] == val+1:
+                total += dfs(graph, neighbor)
+        return total
+
+    t = 0
+    for r in range(m):
+        for c in range(n):
+            if g[(r, c)] == 0:
+                t += dfs(g, (r, c))
+    return t
+
+
+def solve_part_two_other(fname):
+    g, m, n = parse(fname)
     zeroes = []
     nines = []
     for r in range(m):
@@ -53,9 +75,6 @@ def solve_part_two(fname):
                 nines.append((r, c))
 
     def count_paths(graph, start, end, visited):
-        if visited is None:
-            visited = set()
-
         if start == end:
             return 1
 
