@@ -40,10 +40,12 @@ def try_move_box(obstacles, boxes, d, box_pos):
     if nxt_pos in obstacles:
         # Can't move
         return False
+
     if nxt_pos not in boxes:
         boxes.remove(box_pos)
         boxes.add(nxt_pos)
         return True
+
     # recurse
     if try_move_box(obstacles, boxes, d, nxt_pos):
         boxes.remove(box_pos)
@@ -114,16 +116,18 @@ def parse_two(fname):
 
 def try_move_box_lr(obstacles, d, l_boxes, r_boxes, box_pos):
     nxt_pos = sum_tuples(d, box_pos)
-    curr_boxes = r_boxes if box_pos in r_boxes else l_boxes
-    other_boxes = l_boxes if box_pos in r_boxes else r_boxes
     if nxt_pos in obstacles:
         # Can't move
         return False
+
+    curr_boxes = r_boxes if box_pos in r_boxes else l_boxes
+    other_boxes = l_boxes if box_pos in r_boxes else r_boxes
     # have to check other one
     if nxt_pos not in other_boxes:
         curr_boxes.remove(box_pos)
         curr_boxes.add(nxt_pos)
         return True
+
     # recurse
     if try_move_box_lr(obstacles, d, l_boxes, r_boxes, nxt_pos):
         curr_boxes.remove(box_pos)
