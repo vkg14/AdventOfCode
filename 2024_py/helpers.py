@@ -7,6 +7,7 @@ DIRS = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 DIR_NAMES = ['R', 'D', 'L', 'U']
 sum_tuples = lambda tuple1, tuple2: tuple(a + b for a, b in zip(tuple1, tuple2))
 diff_tuples = lambda tuple1, tuple2: tuple(a - b for a, b in zip(tuple1, tuple2))
+mul_tuple = lambda tuple1, c: tuple(c * t for t in tuple1)
 
 
 def in_bounds(t1, m, n):
