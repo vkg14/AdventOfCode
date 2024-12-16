@@ -7,8 +7,8 @@ from heapq import heappush, heappop
 
 from helpers import *
 
-
 sys.setrecursionlimit(2000)
+
 
 def parse(fname):
     content = get_readlines_stripped(fname)
@@ -30,40 +30,7 @@ def parse(fname):
     return full_grid, obstacles, start_pos, end_pos, m, n
 
 
-def solve_part_one(fname):
-    _, obstacles, start_pos, end_pos, m, n = parse(fname)
-    pq = []
-    heappush(pq, (0, start_pos, (0, 1)))  # (distance, node)
-
-    scores = {(start_pos, (0, 1)): 0}
-
-    best_score = sys.maxsize
-
-    while pq:
-        score, pos, d = heappop(pq)
-
-        if score > scores.get((pos, d), sys.maxsize):
-            continue
-
-        if pos == end_pos:
-            best_score = min(best_score, score)
-
-        idx = DIRS.index(d)
-        for n_idx in [idx, (idx+1) % 4, (idx-1) % 4]:
-            next_d = DIRS[n_idx]
-            nxt_pos = sum_tuples(pos, next_d)
-            if nxt_pos in obstacles or not in_bounds(nxt_pos, m, n):
-                continue
-            nxt_score = score + (1 if next_d == d else 1001)
-
-            if nxt_score < scores.get((nxt_pos, next_d), sys.maxsize):
-                scores[(nxt_pos, next_d)] = nxt_score
-                heappush(pq, (nxt_score, nxt_pos, next_d))
-
-    return best_score
-
-
-def solve_part_two(fname):
+def run_dijkstra(fname):
     _, obstacles, start_pos, end_pos, m, n = parse(fname)
     pq = []
     # score, pos, d, prev_score, prev_pos, prev_d
@@ -102,6 +69,17 @@ def solve_part_two(fname):
             if nxt_score <= scores.get((nxt_pos, next_d), sys.maxsize):
                 scores[(nxt_pos, next_d)] = nxt_score
                 heappush(pq, (nxt_score, nxt_pos, next_d, score, pos, d))
+
+    return best_score, end_pos, prev
+
+
+def solve_part_one(fname):
+    best_score, _, _ = run_dijkstra(fname)
+    return best_score
+
+
+def solve_part_two(fname):
+    best_score, end_pos, prev = run_dijkstra(fname)
 
     q = deque()
     tiles = set()
