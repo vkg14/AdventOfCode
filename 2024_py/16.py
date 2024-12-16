@@ -15,6 +15,7 @@ def parse(fname):
     obstacles = set()
     start_pos = None
     end_pos = None
+    full_grid = {}
     for i, line in enumerate(content):
         for j, char in enumerate(line):
             if char == "#":
@@ -23,26 +24,29 @@ def parse(fname):
                 start_pos = (i, j)
             elif char == "E":
                 end_pos = (i, j)
+            full_grid[(i, j)] = char
     m = len(content)
     n = len(content[0])
-    return obstacles, start_pos, end_pos, m, n
+    return full_grid, obstacles, start_pos, end_pos, m, n
 
 
 def solve_part_one(fname):
-    obstacles, start_pos, end_pos, m, n = parse(fname)
+    _, obstacles, start_pos, end_pos, m, n = parse(fname)
     pq = []
     heappush(pq, (0, start_pos, (0, 1)))  # (distance, node)
 
-    scores = {start_pos: 0}
+    scores = {(start_pos, (0, 1)): 0}
+
+    best_score = sys.maxsize
 
     while pq:
         score, pos, d = heappop(pq)
 
-        if score > scores.get(pos, sys.maxsize):
+        if score > scores.get((pos, d), sys.maxsize):
             continue
 
         if pos == end_pos:
-            return score
+            best_score = min(best_score, score)
 
         idx = DIRS.index(d)
         for n_idx in [idx, (idx+1) % 4, (idx-1) % 4]:
@@ -52,18 +56,70 @@ def solve_part_one(fname):
                 continue
             nxt_score = score + (1 if next_d == d else 1001)
 
-            if nxt_score < scores.get(nxt_pos, sys.maxsize):
-                scores[nxt_pos] = nxt_score
+            if nxt_score < scores.get((nxt_pos, next_d), sys.maxsize):
+                scores[(nxt_pos, next_d)] = nxt_score
                 heappush(pq, (nxt_score, nxt_pos, next_d))
 
-    return -1
+    return best_score
 
 
 def solve_part_two(fname):
-    return -1
+    _, obstacles, start_pos, end_pos, m, n = parse(fname)
+    pq = []
+    # score, pos, d, prev_score, prev_pos, prev_d
+    heappush(pq, (0, start_pos, (0, 1), -1, None, None))
+
+    scores = {(start_pos, (0, 1)): 0}
+    # how to get from (score, pos, d) -> last
+    prev = defaultdict(list)
+
+    best_score = sys.maxsize
+
+    while pq:
+        score, pos, d, prev_score, prev_pos, prev_d = heappop(pq)
+
+        if score > scores.get((pos, d), sys.maxsize):
+            continue
+
+        if pos == end_pos:
+            best_score = min(best_score, score)
+
+        # Add path to "best paths" but no need to re-explore if seen
+        already_seen = (score, pos, d) in prev
+        prev[(score, pos, d)].append((prev_score, prev_pos, prev_d))
+        if already_seen:
+            continue
+
+        idx = DIRS.index(d)
+        for n_idx in [idx, (idx+1) % 4, (idx-1) % 4]:
+            next_d = DIRS[n_idx]
+            nxt_pos = sum_tuples(pos, next_d)
+            if nxt_pos in obstacles or not in_bounds(nxt_pos, m, n):
+                continue
+            nxt_score = score + (1 if next_d == d else 1001)
+
+            # include == paths here
+            if nxt_score <= scores.get((nxt_pos, next_d), sys.maxsize):
+                scores[(nxt_pos, next_d)] = nxt_score
+                heappush(pq, (nxt_score, nxt_pos, next_d, score, pos, d))
+
+    q = deque()
+    tiles = set()
+    for d in DIRS:
+        q.append((best_score, end_pos, d))
+
+    while q:
+        s, p, d = q.popleft()
+        tiles.add(p)
+        for ps, pp, pd in prev[(s, p, d)]:
+            if ps < 0:
+                continue
+            q.append((ps, pp, pd))
+
+    return len(tiles)
 
 
-def run_solution(day, ignore_example=False, ex_answer_1=11048, ex_answer_2=0):
+def run_solution(day, ignore_example=False, ex_answer_1=11048, ex_answer_2=64):
     example_file = f'examples/example{day}.txt'
     input_file = f'inputs/input{day}.txt'
 
