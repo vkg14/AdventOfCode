@@ -90,7 +90,7 @@ b = b ^ c
 output -> b mod 8
 jump 0
 
-- Only the last 3 bits of A matter for each iteration's output (b = a mod 8) ??
+- Only the last 3 bits of A matter for each iteration's output (b = a mod 8)
 - A gets last 3 bits truncated in each iter (a // 8)
 - B and C get reset during each iteration based on A
 """
