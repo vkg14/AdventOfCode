@@ -29,6 +29,12 @@ def get_grid_as_map(fname):
     return full_grid, m, n
 
 
+def iter_cells(m, n):
+    for r in range(m):
+        for c in range(n):
+            yield (r, c)
+
+
 def print_grid(grid, m, n, filler='.'):
     res = [[filler] * n for _ in range(m)]
     for r in range(m):
