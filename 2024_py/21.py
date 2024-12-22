@@ -67,9 +67,9 @@ def get_input_sequence(numeric_apsp, directional_apsp, code, top_layer, debug=Fa
         curr = 'A'
         total_length = 0
         input_sequence = ''
+        apsp = numeric_apsp if layer == top_layer else directional_apsp
         for char_s in seq:
             char = int(char_s) if char_s.isdigit() else char_s
-            apsp = numeric_apsp if layer == top_layer else directional_apsp
 
             if layer == 0:
                 first = apsp[curr][char][0]
