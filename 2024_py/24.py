@@ -111,13 +111,13 @@ def solve_part_two(fname):
     print(gate_repr("hbk"))
     print(gate_repr("z15"))
     print(gate_repr("z16"))
-    print('\n\n')
+    print('\n')
     print(gate_repr("z17"))
     print(gate_repr("z18"))
     print(gate_repr("z19"))
     # kvn needs to be swapped with z18 directly
     print(gate_repr("kvn"))
-    print('\n\n')
+    print('\n')
     # & instead of | between carry and sum bits
     print(gate_repr("z22"))
     print(gate_repr("z23"))
@@ -127,15 +127,14 @@ def solve_part_two(fname):
     print(gate_repr("z24"))
     # dbb is just z23
     print(gate_repr("dbb"))
-    print('\n\n')
+    print('\n')
     # cvh and tfn to swap sum and carry bits of 34/35
     print(gate_repr("z34"))
     print(gate_repr("z35"))
     print(gate_repr("z36"))
+    print('\n')
 
-    print(','.join(sorted(['cvh', 'tfn', 'kvn', 'z18', 'hbk', 'z14', 'dbb', 'z23'])))
-
-    return -1
+    return ','.join(sorted(['cvh', 'tfn', 'kvn', 'z18', 'hbk', 'z14', 'dbb', 'z23']))
 
 
 def run_solution(day, ignore_example=False, ex_answer_1=2024):
